@@ -64,7 +64,22 @@ char *which(char *command, struct pathelement *pathlist )
 {
    /* loop through pathlist until finding command and return it.  Return
    NULL when not found. */
+   char buffer[MAXIN];
+   while (pathlist)
+   {
+		snprintf(buffer, MAXIN, "%s/%s", pathlist->element, command);
 
+		if (access(buffer, X_OK) == -1)
+      	pathlist = pathlist->next;
+    	else
+		{
+      		int len = strlen(buffer);
+      		char *ret = calloc(len+1, sizeof(char));
+      		strncpy(ret, buffer, len);
+      		return ret;
+    	}
+  }
+  return NULL;
 } /* which() */
 
 char *where(char *command, struct pathelement *pathlist )
