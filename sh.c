@@ -9,6 +9,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <signal.h>
+#include <glob.h>
 #include "sh.h"
 
 int sh( int argc, char **argv, char **envp )
@@ -68,6 +69,7 @@ char *which(char *command, struct pathelement *pathlist )
 
 char *where(char *command, struct pathelement *pathlist )
 {
+
   /* similarly loop through finding all locations of command */
 } /* where() */
 
