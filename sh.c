@@ -43,11 +43,39 @@ int sh( int argc, char **argv, char **envp )
   while ( go )
   {
     /* print your prompt */
-
+	printf("\n%s [%s]> ", prompt, pwd);
     /* get command line and process */
+	if (fgets(buff, MAXIMUM, stdin) != NULL)
+	{
+		int len = strlen(buffer);
+      	if(buffer[len - 1] == '\n')
+        	buffer[len-1] = 0;
+      	strcpy(commandline, buffer);
+    }
 
-    /* check for each built in command and implement */
+	int i = 0;
+    char *tok = strtok(commandline, " ");
+    command = tok;
+    memset(args, '\0', MAXARGS*sizeof(char*));
+    while (tok)
+	{
+		args[i] = tok;
+      	tok = strtok(NULL, " ");
+      	i++;
+    }
 
+	if (command != NULL)
+	{
+		/* check for each built in command and implement */
+
+        //which
+        if (strcmp(command, "which") == 0) {
+          for (int i = 1; args[i] != NULL; i++) {
+            commandpath = which(args[i], pathlist);
+            printf("\n%s", commandpath);
+            free(commandpath);
+          }
+        }
      /*  else  program to exec */
     {
        /* find it */
@@ -57,6 +85,14 @@ int sh( int argc, char **argv, char **envp )
         /* fprintf(stderr, "%s: Command not found.\n", args[0]); */
     }
   }
+  deletepath(&pathlist);
+  free(args);
+  free(commandline);
+  free(owd);
+  free(prompt);
+  free(pwd);
+  pathlist = NULL;
+  exit(0);
   return 0;
 } /* sh() */
 
@@ -64,18 +100,18 @@ char *which(char *command, struct pathelement *pathlist )
 {
    /* loop through pathlist until finding command and return it.  Return
    NULL when not found. */
-   char buffer[MAXIN];
+   char buff[MAXIMUM];
    while (pathlist)
    {
-		snprintf(buffer, MAXIN, "%s/%s", pathlist->element, command);
+		snprintf(buff, MAXIMUM, "%s/%s", pathlist->element, command);
 
-		if (access(buffer, X_OK) == -1)
+		if (access(buff, X_OK) == -1)
       	pathlist = pathlist->next;
     	else
 		{
-      		int len = strlen(buffer);
+      		int len = strlen(buff);
       		char *ret = calloc(len+1, sizeof(char));
-      		strncpy(ret, buffer, len);
+      		strncpy(ret, buff, len);
       		return ret;
     	}
   }
