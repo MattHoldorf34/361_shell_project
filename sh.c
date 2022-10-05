@@ -13,6 +13,7 @@
 
 int sh( int argc, char **argv, char **envp )
 {
+  int pid; //updated from initial file
   char *prompt = calloc(PROMPTMAX, sizeof(char));
   char *commandline = calloc(MAX_CANON, sizeof(char));
   char *command, *arg, *commandpath, *p, *pwd, *owd;
