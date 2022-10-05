@@ -9,6 +9,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <signal.h>
+#include <glob.h>
 #include "sh.h"
 
 int sh( int argc, char **argv, char **envp )
@@ -69,13 +70,34 @@ char *which(char *command, struct pathelement *pathlist )
 
 char *where(char *command, struct pathelement *pathlist )
 {
-  /* similarly loop through finding all locations of command */
+	char buff[MAXIMUM];
+	char *ret;
+	int flag = 0;
+
+	while (pathlist) {
+		snprintf(buff, MAXIMUM, "%s/%s", pathlist->element, command);
+		if (access(buff, X_OK) == -1)
+			pathlist = pathlist->next;
+		else if (access(buff, X_OK) != -1 && flag == 0) {
+			flag = 1;
+			int len = strlen(buff);
+			ret = calloc(len+1, sizeof(char));
+			strncpy(ret, buff, len);
+			printf("\n%s", ret);
+			pathlist = pathlist->next;
+		} else if (access(buff, X_OK) != -1) {
+			printf("\n%s", buff);
+			pathlist = pathlist->next;
+		}
+	}
+	return ret;
+	/* similarly loop through finding all locations of command */
 } /* where() */
 
 void list ( char *dir )
 {
-  /* see man page for opendir() and readdir() and print out filenames for
-  the directory passed */
+	/* see man page for opendir() and readdir() and print out filenames for
+	   the directory passed */
 } /* list() */
 
 
