@@ -120,6 +120,12 @@ int sh( int argc, char **argv, char **envp )
             		}	
           		}
 			}
+			
+			//Checks if command is pid, then prints the process ID.
+			else if (strcmp(command, "pid") == 0) {
+          		printExec(command);
+          		printf("\nPID: %d\n", getpid());
+        	}
 			/*  else  program to exec */
 			/* find it */
 			/* do fork(), execve() and waitpid() */
