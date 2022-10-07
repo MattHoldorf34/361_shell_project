@@ -88,6 +88,10 @@ int sh( int argc, char **argv, char **envp )
 					free(commandpath);
 				}
 			}
+			else if (strcmp(command, "pwd") == 0) {
+				printExec(command);
+				printf("\n%s\n", pwd);
+			}
 			/*  else  program to exec */
 			/* find it */
 			/* do fork(), execve() and waitpid() */
@@ -162,5 +166,5 @@ void list ( char *dir )
 } /* list() */
 
 void printExec(char * command) {
-  printf("Executing %s\n", command);
+	printf("Executing %s\n", command);
 }
