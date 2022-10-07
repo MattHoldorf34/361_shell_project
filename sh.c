@@ -69,9 +69,12 @@ int sh( int argc, char **argv, char **envp )
 		if (command != NULL)
 		{
 			/* check for each built in command and implement */
-
+			if (strcmp(command, "exit") == 0) {
+				printExec(command);
+				break;
+			}
 			//which
-			if (strcmp(command, "which") == 0) {
+			else if (strcmp(command, "which") == 0) {
 				for (int i = 1; args[i] != NULL; i++) {
 					commandpath = which(args[i], pathlist);
 					printf("\n%s", commandpath);
@@ -86,11 +89,11 @@ int sh( int argc, char **argv, char **envp )
 				}
 			}
 			/*  else  program to exec */
-				/* find it */
-				/* do fork(), execve() and waitpid() */
+			/* find it */
+			/* do fork(), execve() and waitpid() */
 
-				/* else */
-				/* fprintf(stderr, "%s: Command not found.\n", args[0]); */
+			/* else */
+			/* fprintf(stderr, "%s: Command not found.\n", args[0]); */
 		}
 	}
 	deletepath(&pathlist);
@@ -158,4 +161,6 @@ void list ( char *dir )
 	   the directory passed */
 } /* list() */
 
-
+void printExec(char * command) {
+  printf("Executing %s\n", command);
+}
