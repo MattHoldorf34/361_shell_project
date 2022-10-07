@@ -88,10 +88,44 @@ int sh( int argc, char **argv, char **envp )
 					free(commandpath);
 				}
 			}
+
+			//Checks for pwd command
 			else if (strcmp(command, "pwd") == 0) {
 				printExec(command);
 				printf("\n%s\n", pwd);
 			}
+
+			//Checks for list command
+			else if (strcmp(command, "list") == 0) {
+				printExec(command);
+				//if there are no arguments, list current dir. one per line.
+          		if (args[1] == NULL)
+            		list(pwd);
+				//else: list all files for each directory given.
+          		else
+				{
+            		int i = 1;
+            		while (args[i])
+					{
+						//if there is no access error, list for that directory.
+              			if (access(args[i], X_OK) == -1)
+                			perror("\n Error: ");
+              			else
+						{
+                			printf("\n%s\n", args[i]);
+                			list(args[i]);
+              			}
+						//go to next argument (directory).
+              			i++;
+            		}	
+          		}
+			}
+			
+			//Checks if command is pid, then prints the process ID.
+			else if (strcmp(command, "pid") == 0) {
+          		printExec(command);
+          		printf("\nPID: %d\n", getpid());
+        	}
 			/*  else  program to exec */
 			/* find it */
 			/* do fork(), execve() and waitpid() */
@@ -163,6 +197,13 @@ void list ( char *dir )
 {
 	/* see man page for opendir() and readdir() and print out filenames for
 	   the directory passed */
+	DIR *userdir = opendir(dir);
+  	struct dirent *file;
+  	if (userdir) {
+    	while ((file = readdir(userdir)) != NULL) 
+      	printf("%s\n", file->d_name);
+  	}
+  	closedir(userdir);
 } /* list() */
 
 void printExec(char * command) {
