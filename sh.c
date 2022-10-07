@@ -86,77 +86,76 @@ int sh( int argc, char **argv, char **envp )
 				}
 			}
 			/*  else  program to exec */
-			{
 				/* find it */
 				/* do fork(), execve() and waitpid() */
 
 				/* else */
 				/* fprintf(stderr, "%s: Command not found.\n", args[0]); */
-			}
 		}
-		deletepath(&pathlist);
-		free(args);
-		free(commandline);
-		free(owd);
-		free(prompt);
-		free(pwd);
-		pathlist = NULL;
-		exit(0);
-		return 0;
-	} /* sh() */
+	}
+	deletepath(&pathlist);
+	free(args);
+	free(commandline);
+	free(owd);
+	free(prompt);
+	free(pwd);
+	pathlist = NULL;
+	exit(0);
+	return 0;
+} /* sh() */
 
-	char *which(char *command, struct pathelement *pathlist )
+char *which(char *command, struct pathelement *pathlist )
+{
+	/* loop through pathlist until finding command and return it.  Return
+	   NULL when not found. */
+	char buff[MAXIMUM];
+	while (pathlist)
 	{
-		/* loop through pathlist until finding command and return it.  Return
-		   NULL when not found. */
-		char buff[MAXIMUM];
-		while (pathlist)
+		snprintf(buff, MAXIMUM, "%s/%s", pathlist->element, command);
+
+		if (access(buff, X_OK) == -1)
+			pathlist = pathlist->next;
+		else
 		{
-			snprintf(buff, MAXIMUM, "%s/%s", pathlist->element, command);
-
-			if (access(buff, X_OK) == -1)
-				pathlist = pathlist->next;
-			else
-			{
-				int len = strlen(buff);
-				char *ret = calloc(len+1, sizeof(char));
-				strncpy(ret, buff, len);
-				return ret;
-			}
+			int len = strlen(buff);
+			char *ret = calloc(len+1, sizeof(char));
+			strncpy(ret, buff, len);
+			return ret;
 		}
-		return NULL;
-	} /* which() */
+	}
+	return NULL;
+} /* which() */
 
-	char *where(char *command, struct pathelement *pathlist )
-	{
-		char buff[MAXIMUM];
-		char *ret;
-		int flag = 0;
+char *where(char *command, struct pathelement *pathlist )
+{
+	char buff[MAXIMUM];
+	char *ret;
+	int flag = 0;
 
-		while (pathlist) {
-			snprintf(buff, MAXIMUM, "%s/%s", pathlist->element, command);
-			if (access(buff, X_OK) == -1)
-				pathlist = pathlist->next;
-			else if (access(buff, X_OK) != -1 && flag == 0) {
-				flag = 1;
-				int len = strlen(buff);
-				ret = calloc(len+1, sizeof(char));
-				strncpy(ret, buff, len);
-				printf("\n%s", ret);
-				pathlist = pathlist->next;
-			} else if (access(buff, X_OK) != -1) {
-				printf("\n%s", buff);
-				pathlist = pathlist->next;
-			}
+	while (pathlist) {
+		snprintf(buff, MAXIMUM, "%s/%s", pathlist->element, command);
+		if (access(buff, X_OK) == -1)
+			pathlist = pathlist->next;
+		else if (access(buff, X_OK) != -1 && flag == 0) {
+			flag = 1;
+			int len = strlen(buff);
+			ret = calloc(len+1, sizeof(char));
+			strncpy(ret, buff, len);
+			printf("\n%s", ret);
+			pathlist = pathlist->next;
+		} else if (access(buff, X_OK) != -1) {
+			printf("\n%s", buff);
+			pathlist = pathlist->next;
 		}
-		return ret;
-		/* similarly loop through finding all locations of command */
-	} /* where() */
+	}
+	return ret;
+	/* similarly loop through finding all locations of command */
+} /* where() */
 
-	void list ( char *dir )
-	{
-		/* see man page for opendir() and readdir() and print out filenames for
-		   the directory passed */
-	} /* list() */
+void list ( char *dir )
+{
+	/* see man page for opendir() and readdir() and print out filenames for
+	   the directory passed */
+} /* list() */
 
 
