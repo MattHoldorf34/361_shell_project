@@ -19,11 +19,13 @@ int sh( int argc, char **argv, char **envp )
 	char *commandline = calloc(MAX_CANON, sizeof(char));
 	char *command, *arg, *commandpath, *p, *pwd, *owd;
 	char **args = calloc(MAXARGS, sizeof(char*));
+	char **enviro;
 	int uid, i, status, argsct, go = 1;
 	struct passwd *password_entry;
 	char *homedir;
 	struct pathelement *pathlist;
 	char buff[MAXIMUM];
+	char promptBuff[PROMPTMAX];
 
 	uid = getuid();
 	password_entry = getpwuid(uid);               /* get passwd info */
@@ -126,6 +128,43 @@ int sh( int argc, char **argv, char **envp )
           		printExec(command);
           		printf("\nPID: %d\n", getpid());
         	}
+
+			//Checks if it is prompt
+			else if (strcmp(command, "prompt") == 0)
+			{
+				printExec(command);
+				//When ran with no arguments, promts for a new prompt prefix string.
+				if (args[1] == NULL)
+				{
+					printf("\n Input Prompt Prefix: ");
+					//When given an argument, make that the new prefix prompt.
+					if (fgets(promptBuff, PROMPTMAX, stdin) != NULL)
+					{
+              			int len = strlen(promptBuff);
+              			if (promptBuff[len - 1] == '\n')
+                			promptBuff[len - 1] = 0;
+              			strtok(promptBuff, " ");
+              			strcpy(prompt, promptBuff);
+            		}
+					else
+						strcpy(prompt, args[1]);
+				}
+			}
+			
+			//Checks if printenv command.
+			else if (strcmp(command, "printenv") == 0)
+			{
+          		printExec(command);
+				//When ran with no arguments, prints the whole environment.
+          		if (args[1] == NULL)
+            		printenv(enviro);
+				//If one argument, call getenv(3) on it.
+          		else if (args[2] == NULL)
+            		printf("\n%s\n", getenv(args[1]));
+          		//two or more arguments, produce error message.
+				else
+            		printf("\nprintenv: Too Many Arguments\n");
+			}
 			/*  else  program to exec */
 			/* find it */
 			/* do fork(), execve() and waitpid() */
@@ -205,7 +244,15 @@ void list ( char *dir )
   	}
   	closedir(userdir);
 } /* list() */
-
+void printenv(char ** envp) {
+  int i = 0;
+  if (envp[0] != NULL) {
+	while(envp[i] != NULL) {
+		printf("%s\n", envp[i]);
+		i++;
+	}
+  }
+}
 void printExec(char * command) {
 	printf("Executing %s\n", command);
 }
