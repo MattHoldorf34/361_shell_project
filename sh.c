@@ -90,6 +90,40 @@ int sh( int argc, char **argv, char **envp )
 					free(commandpath);
 				}
 			}
+
+			//command is cd.
+			else if(strcmp(command, "cd" ) == 0)
+			{
+				//No arguments: returns to home directory.
+	  			printExec(command);
+	  			if(args[1] == NULL)
+				{
+	    			strcpy(owd, pwd);
+	    			strcpy(pwd, homedir);
+	    			chdir(pwd);
+	  			}
+				//Goes back to previous directory.
+				else if(strcmp(args[1], "-") == 0)
+				{
+	    			p = pwd;
+	   				pwd = owd;
+	    			owd = p;
+	    			chdir(pwd);
+	  			}
+				//Too many arguments error.
+				else if(args[1] != NULL && args[2] == NULL)
+				{		
+	    			if(chdir(args[1]) == -1)
+	      				perror("Error ");
+					else
+					{
+	      				memset(owd, '\0', strlen(owd));
+	      				memcpy(owd, pwd, strlen(pwd));  
+	      				getcwd(pwd, PATH_MAX+1);
+	    			}	    
+	  			}
+			}
+
 			//Checks for pwd command
 			else if (strcmp(command, "pwd") == 0) {
 				printExec(command);
@@ -173,6 +207,42 @@ int sh( int argc, char **argv, char **envp )
 				else
 					printf("\nprintenv: Too Many Arguments\n");
 			}
+
+
+			//Command is setenv
+			else if (strcmp(command, "setenv") == 0)
+			{
+				printExec(command);
+          		//If no arguments, print the whole environment.
+				if (args[1] == NULL)
+            		printenv(enviro);
+				//Must make sure a second argument is given for PATH or HOME.
+          		else if(args[2] == NULL && (strcmp(args[1], "PATH") == 0 || strcmp(args[1], "HOME") == 0))
+            		printf("\nDo not set PATH or HOME to empty\n");
+          		else if (args[2] == NULL)
+				{
+            		if (setenv(args[1], "", 1) == -1)
+              			perror("Error: ");
+          		}
+				else if (args[3] == NULL)
+				{
+            		if (setenv(args[1], args[2], 1) == -1)
+              			perror("Error: ");
+            		else
+					{
+              			//Update linked list path directories.
+						if (strcmp(args[1], "PATH") == 0)
+						{
+                			deletepath(&pathlist);
+                			pathlist = NULL;
+              			}
+						//CD to new home.
+              			if (strcmp(args[1], "HOME") == 0)
+                			homedir = args[2];
+            		}
+          		}
+				else printf("\nError setenv: Too Many Arguments\n");
+      }
 			else if (args[3] = NULL) {
 				int sig = 0;
 				int temp = -1;
@@ -274,12 +344,10 @@ void list ( char *dir )
 
 void printenv(char ** envp) {
 	int i = 0;
-	if (envp[0] != NULL) {
-		while(envp[i] != NULL) {
-			printf("%s\n", envp[i]);
-			i++;
-		}
-	}
+  while(envp[i]!=NULL){
+    printf("%s\n",envp[i]);
+    i++;
+  }
 }
 
 void printExec(char * command) {
