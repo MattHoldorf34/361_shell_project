@@ -195,12 +195,41 @@ int sh( int argc, char **argv, char **envp )
 				else
             		printf("\nprintenv: Too Many Arguments\n");
 			}
-			/*  else  program to exec */
-			/* find it */
-			/* do fork(), execve() and waitpid() */
 
-			/* else */
-			/* fprintf(stderr, "%s: Command not found.\n", args[0]); */
+			//Command is setenv
+			else if (strcmp(command, "setenv") == 0)
+			{
+				printExec(command);
+          		//If no arguments, print the whole environment.
+				if (args[1] == NULL)
+            		printenv(enviro);
+				//Must make sure a second argument is given for PATH or HOME.
+          		else if(args[2] == NULL && (strcmp(args[1], "PATH") == 0 || strcmp(args[1], "HOME") == 0))
+            		printf("\nDo not set PATH or HOME to empty\n");
+          		else if (args[2] == NULL)
+				{
+            		if (setenv(args[1], "", 1) == -1)
+              			perror("Error: ");
+          		}
+				else if (args[3] == NULL)
+				{
+            		if (setenv(args[1], args[2], 1) == -1)
+              			perror("Error: ");
+            		else
+					{
+              			//Update linked list path directories.
+						if (strcmp(args[1], "PATH") == 0)
+						{
+                			deletepath(&pathlist);
+                			pathlist = NULL;
+              			}
+						//CD to new home.
+              			if (strcmp(args[1], "HOME") == 0)
+                			homedir = args[2];
+            		}
+          		}
+				else printf("\nError setenv: Too Many Arguments\n");
+			}
 		}
 	}
 	deletepath(&pathlist);
@@ -274,13 +303,11 @@ void list ( char *dir )
 } /* list() */
 
 void printenv(char ** envp) {
-  int i = 0;
-  if (envp[0] != NULL) {
-	while(envp[i] != NULL) {
-		printf("%s\n", envp[i]);
-		i++;
-	}
-  }
+	int i = 0;
+    while(envp[i]!=NULL){
+      printf("%s\n",envp[i]);
+      i++;
+    }
 }
 
 void printExec(char * command) {
