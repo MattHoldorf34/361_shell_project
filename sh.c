@@ -90,13 +90,11 @@ int sh( int argc, char **argv, char **envp )
 					free(commandpath);
 				}
 			}
-
 			//Checks for pwd command
 			else if (strcmp(command, "pwd") == 0) {
 				printExec(command);
 				printf("\n%s\n", pwd);
 			}
-
 			//Checks for list command
 			else if (strcmp(command, "list") == 0) {
 				printExec(command);
@@ -128,7 +126,6 @@ int sh( int argc, char **argv, char **envp )
           		printExec(command);
           		printf("\nPID: %d\n", getpid());
         	}
-
 			//Checks if it is prompt
 			else if (strcmp(command, "prompt") == 0)
 			{
@@ -150,7 +147,6 @@ int sh( int argc, char **argv, char **envp )
 						strcpy(prompt, args[1]);
 				}
 			}
-			
 			//Checks if printenv command.
 			else if (strcmp(command, "printenv") == 0)
 			{
@@ -192,7 +188,6 @@ char *which(char *command, struct pathelement *pathlist )
 	while (pathlist)
 	{
 		snprintf(buff, MAXIMUM, "%s/%s", pathlist->element, command);
-
 		if (access(buff, X_OK) == -1)
 			pathlist = pathlist->next;
 		else
@@ -211,7 +206,6 @@ char *where(char *command, struct pathelement *pathlist )
 	char buff[MAXIMUM];
 	char *ret;
 	int flag = 0;
-
 	while (pathlist) {
 		snprintf(buff, MAXIMUM, "%s/%s", pathlist->element, command);
 		if (access(buff, X_OK) == -1)
@@ -244,6 +238,7 @@ void list ( char *dir )
   	}
   	closedir(userdir);
 } /* list() */
+
 void printenv(char ** envp) {
   int i = 0;
   if (envp[0] != NULL) {
@@ -253,6 +248,19 @@ void printenv(char ** envp) {
 	}
   }
 }
+
 void printExec(char * command) {
 	printf("Executing %s\n", command);
+}
+
+int findWildcard(char wc, char **args) {
+  int i = 0;
+  char *j;
+  while (args[i]) {
+    j = strchr(args[i], wc);
+    if (j != NULL)
+      return i;
+    i++;
+  }
+  return -1;
 }
