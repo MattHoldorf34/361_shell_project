@@ -154,12 +154,24 @@ int sh( int argc, char **argv, char **envp )
             		}	
           		}
 			}
-			
 			//Checks if command is pid, then prints the process ID.
 			else if (strcmp(command, "pid") == 0) {
-          		printExec(command);
-          		printf("\nPID: %d\n", getpid());
-        	}
+				printExec(command);
+				printf("\nPID: %d\n", getpid());
+			}
+			else if (strcmp(command, "kill") == 0) {
+				if (args[1] == NULL)
+					printf("\nNo Argument Given for %s", command);
+				else if (args[2] == NULL) {
+					int temp = -1;
+					sscanf(args[1], "%d", &temp);
+					if (temp != -1) {
+						if (kill(temp, 15) == -1)
+							perror("Error: ");
+					} else 
+						printf("\nInvalid PID");
+				}
+			}
 			//Checks if it is prompt
 			else if (strcmp(command, "prompt") == 0)
 			{
@@ -171,12 +183,12 @@ int sh( int argc, char **argv, char **envp )
 					//When given an argument, make that the new prefix prompt.
 					if (fgets(promptBuff, PROMPTMAX, stdin) != NULL)
 					{
-              			int len = strlen(promptBuff);
-              			if (promptBuff[len - 1] == '\n')
-                			promptBuff[len - 1] = 0;
-              			strtok(promptBuff, " ");
-              			strcpy(prompt, promptBuff);
-            		}
+						int len = strlen(promptBuff);
+						if (promptBuff[len - 1] == '\n')
+							promptBuff[len - 1] = 0;
+						strtok(promptBuff, " ");
+						strcpy(prompt, promptBuff);
+					}
 					else
 						strcpy(prompt, args[1]);
 				}
@@ -184,17 +196,18 @@ int sh( int argc, char **argv, char **envp )
 			//Checks if printenv command.
 			else if (strcmp(command, "printenv") == 0)
 			{
-          		printExec(command);
+				printExec(command);
 				//When ran with no arguments, prints the whole environment.
-          		if (args[1] == NULL)
-            		printenv(enviro);
+				if (args[1] == NULL)
+					printenv(enviro);
 				//If one argument, call getenv(3) on it.
-          		else if (args[2] == NULL)
-            		printf("\n%s\n", getenv(args[1]));
-          		//two or more arguments, produce error message.
+				else if (args[2] == NULL)
+					printf("\n%s\n", getenv(args[1]));
+				//two or more arguments, produce error message.
 				else
-            		printf("\nprintenv: Too Many Arguments\n");
+					printf("\nprintenv: Too Many Arguments\n");
 			}
+
 
 			//Command is setenv
 			else if (strcmp(command, "setenv") == 0)
@@ -229,8 +242,35 @@ int sh( int argc, char **argv, char **envp )
             		}
           		}
 				else printf("\nError setenv: Too Many Arguments\n");
+      }
+			else if (args[3] = NULL) {
+				int sig = 0;
+				int temp = -1;
+				sscanf(args[1], "%d", &sig);
+				sscanf(args[2], "%d", &sig);
+				if (sig < 0 && temp != - 1) {
+					if (sig == -1 && temp == getpid()) {
+						deletepath(&pathlist);
+						free(args);
+						free(commandline);
+						free(owd);
+						free(prompt);
+						free(pwd);
+						pathlist = NULL;
+					}
+					if (kill (temp, abs(sig)) == -1)
+						perror("Error: ");
+
+				} else
+					printf("\n Invalid arguments for %s", command);
 			}
 		}
+		/*  else  program to exec */
+		/* find it */
+		/* do fork(), execve() and waitpid() */
+
+		/* else */
+		/* fprintf(stderr, "%s: Command not found.\n", args[0]); */
 	}
 	deletepath(&pathlist);
 	free(args);
@@ -294,20 +334,20 @@ void list ( char *dir )
 	/* see man page for opendir() and readdir() and print out filenames for
 	   the directory passed */
 	DIR *userdir = opendir(dir);
-  	struct dirent *file;
-  	if (userdir) {
-    	while ((file = readdir(userdir)) != NULL) 
-      	printf("%s\n", file->d_name);
-  	}
-  	closedir(userdir);
+	struct dirent *file;
+	if (userdir) {
+		while ((file = readdir(userdir)) != NULL) 
+			printf("%s\n", file->d_name);
+	}
+	closedir(userdir);
 } /* list() */
 
 void printenv(char ** envp) {
 	int i = 0;
-    while(envp[i]!=NULL){
-      printf("%s\n",envp[i]);
-      i++;
-    }
+  while(envp[i]!=NULL){
+    printf("%s\n",envp[i]);
+    i++;
+  }
 }
 
 void printExec(char * command) {
@@ -315,13 +355,13 @@ void printExec(char * command) {
 }
 
 int findWildcard(char wc, char **args) {
-  int i = 0;
-  char *j;
-  while (args[i]) {
-    j = strchr(args[i], wc);
-    if (j != NULL)
-      return i;
-    i++;
-  }
-  return -1;
+	int i = 0;
+	char *j;
+	while (args[i]) {
+		j = strchr(args[i], wc);
+		if (j != NULL)
+			return i;
+		i++;
+	}
+	return -1;
 }
