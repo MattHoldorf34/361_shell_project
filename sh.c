@@ -90,6 +90,40 @@ int sh( int argc, char **argv, char **envp )
 					free(commandpath);
 				}
 			}
+
+			//command is cd.
+			else if(strcmp(command, "cd" ) == 0)
+			{
+				//No arguments: returns to home directory.
+	  			printExec(command);
+	  			if(args[1] == NULL)
+				{
+	    			strcpy(owd, pwd);
+	    			strcpy(pwd, homedir);
+	    			chdir(pwd);
+	  			}
+				//Goes back to previous directory.
+				else if(strcmp(args[1], "-") == 0)
+				{
+	    			p = pwd;
+	   				pwd = owd;
+	    			owd = p;
+	    			chdir(pwd);
+	  			}
+				//Too many arguments error.
+				else if(args[1] != NULL && args[2] == NULL)
+				{		
+	    			if(chdir(args[1]) == -1)
+	      				perror("Error ");
+					else
+					{
+	      				memset(owd, '\0', strlen(owd));
+	      				memcpy(owd, pwd, strlen(pwd));  
+	      				getcwd(pwd, PATH_MAX+1);
+	    			}	    
+	  			}
+			}
+
 			//Checks for pwd command
 			else if (strcmp(command, "pwd") == 0) {
 				printExec(command);
