@@ -1,4 +1,7 @@
-
+/*
+Thomas Oves & Matthew Holdorf
+CISC361-010 Project 2
+*/
 #include "get_path.h"
 
 extern int pid; //added extern
