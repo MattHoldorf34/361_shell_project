@@ -14,6 +14,7 @@
 
 int sh( int argc, char **argv, char **envp )
 {
+	int pid; //updated from initial file
 	char *prompt = calloc(PROMPTMAX, sizeof(char));
 	char *commandline = calloc(MAX_CANON, sizeof(char));
 	char *command, *arg, *commandpath, *p, *pwd, *owd;
@@ -25,7 +26,6 @@ int sh( int argc, char **argv, char **envp )
 	struct pathelement *pathlist;
 	char buff[MAXIMUM];
 	char promptBuff[PROMPTMAX];
-	glob_t globIn;
 
 	uid = getuid();
 	password_entry = getpwuid(uid);               /* get passwd info */
@@ -276,23 +276,7 @@ int sh( int argc, char **argv, char **envp )
 				} else
 					printf("\n Invalid arguments for %s", command);
 			}
-			/* ls */
-			else {
-				printf("Executed %s", command);
-				int flagA = findWildcard('?', args);
-				int flagB = findWildcard('*', args);
-
-				if (strcmp(command, "ls") == 0 && flagA != -1)
-					runGlob(flagA, commandpath, pathlist, args, globIn, status);
-				else if (strcmp(command, "ls") == 0 && flagB != -1)
-					runGlob(flagB, commandpath, pathlist, args, globIn, status);
-				else {
-					commandpath = which(command, pathlist);
-					execCommand(commandpath, args, status);
-					free(commandpath);
-				}
-			}
-		}	
+		}
 		/*  else  program to exec */
 		/* find it */
 		/* do fork(), execve() and waitpid() */
@@ -385,35 +369,3 @@ int findWildcard(char wc, char **args) {
 	}
 	return -1;
 }
-
-void execCommand(char *command, char **args, int status){
-	if (command == NULL)
-		fprintf(stderr, "%s: Command not found\n", args[0]);
-	else {
-		pid = fork();
-		if (pid == 0) {
-			execve(command, args, NULL);
-			exit(EXIT_FAILURE);
-		} else if (pid > 0) {
-			do
-				waitpid(pid, &status, WUNTRACED);
-			while (!WIFEXITED(status) && !WIFSIGNALED(status)); 
-		}
-	}
-}
-
-void runGlob(int index, char *commandpath, struct pathelement *pathlist, char **args, glob_t globIn, int status) {
-	globIn.gl_offs = index;
-	glob(args[index], GLOB_DOOFFS, NULL, &globIn);
-	for (int i = 0; i < index; i++) {
-		globIn.gl_pathv[i] = calloc(sizeof(char), strlen(args[i]) + 1);
-		strcpy(globIn.gl_pathv[i], args[i]);
-	}
-	commandpath = which(globIn.gl_pathv[0], pathlist);
-	execCommand(commandpath, globIn.gl_pathv, status);
-	free(commandpath);
-	for (int i = 0; i < index; i++)
-		free(globIn.gl_pathv[i]);
-	globfree(&globIn);
-}
-
