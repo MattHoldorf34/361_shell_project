@@ -1,3 +1,7 @@
+/*
+Thomas Oves & Matthew Holdorf
+CISC361-010 Project 2
+*/
 #include <stdio.h>
 #include <string.h>
 #include <strings.h>
@@ -183,9 +187,9 @@ int sh( int argc, char **argv, char **envp )
 					//When given an argument, make that the new prefix prompt.
 					if (fgets(promptBuff, PROMPTMAX, stdin) != NULL)
 					{
-              			int len = strlen(promptBuff);
-              			if (promptBuff[len - 1] == '\n')
-                			promptBuff[len - 1] = 0;
+              			int length = strlen(promptBuff);
+              			if (promptBuff[length - 1] == '\n')
+                			promptBuff[length - 1] = 0;
               			strtok(promptBuff, " ");
               			strcpy(prompt, promptBuff);
             		}
@@ -266,8 +270,8 @@ int sh( int argc, char **argv, char **envp )
 						free(args);
 						free(commandline);
 						free(owd);
-						free(prompt);
 						free(pwd);
+						free(prompt);
 						pathlist = NULL;
 					}
 					if (kill (temp, abs(sig)) == -1)
@@ -290,8 +294,8 @@ int sh( int argc, char **argv, char **envp )
 	free(args);
 	free(commandline);
 	free(owd);
-	free(prompt);
 	free(pwd);
+	free(prompt);
 	pathlist = NULL;
 	exit(0);
 	return 0;
@@ -320,6 +324,7 @@ char *which(char *command, struct pathelement *pathlist )
 
 char *where(char *command, struct pathelement *pathlist )
 {
+	/* similarly loop through finding all locations of command */
 	char buff[MAXIMUM];
 	char *ret;
 	int flag = 0;
@@ -340,7 +345,6 @@ char *where(char *command, struct pathelement *pathlist )
 		}
 	}
 	return ret;
-	/* similarly loop through finding all locations of command */
 } /* where() */
 
 void list ( char *dir )
@@ -357,6 +361,7 @@ void list ( char *dir )
 } /* list() */
 
 void printExec(char * command) {
+	/* Prints the command that is being executed. */
 	printf("Executing %s\n", command);
 }
 
