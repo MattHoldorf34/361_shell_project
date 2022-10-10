@@ -183,15 +183,15 @@ int sh( int argc, char **argv, char **envp )
 					//When given an argument, make that the new prefix prompt.
 					if (fgets(promptBuff, PROMPTMAX, stdin) != NULL)
 					{
-						int length = strlen(promptBuff);
-						if (promptBuff[length - 1] == '\n')
-							promptBuff[length - 1] = 0;
-						strtok(promptBuff, " ");
-						strcpy(prompt, promptBuff);
-					}
-					else
-						strcpy(prompt, args[1]);
+              			int len = strlen(promptBuff);
+              			if (promptBuff[len - 1] == '\n')
+                			promptBuff[len - 1] = 0;
+              			strtok(promptBuff, " ");
+              			strcpy(prompt, promptBuff);
+            		}
 				}
+				else
+					strcpy(prompt, args[1]);
 			}
 			//Checks if printenv command.
 			else if (strcmp(command, "printenv") == 0)
