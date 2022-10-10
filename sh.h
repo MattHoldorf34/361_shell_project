@@ -4,7 +4,7 @@ CISC361-010 Project 2
 */
 #include "get_path.h"
 
-extern int pid; //added extern
+extern int pid;
 int sh( int argc, char **argv, char **envp);
 char *which(char *command, struct pathelement *pathlist);
 char *where(char *command, struct pathelement *pathlist);
