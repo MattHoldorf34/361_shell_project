@@ -275,6 +275,8 @@ int sh( int argc, char **argv, char **envp )
 
 				} else
 					printf("\n Invalid arguments for %s", command);
+			} else {
+				printf("%s: Command not found.\n", command);
 			}
 		}
 		/*  else  program to exec */
