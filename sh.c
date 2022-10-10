@@ -183,9 +183,9 @@ int sh( int argc, char **argv, char **envp )
 					//When given an argument, make that the new prefix prompt.
 					if (fgets(promptBuff, PROMPTMAX, stdin) != NULL)
 					{
-						int len = strlen(promptBuff);
-						if (promptBuff[len - 1] == '\n')
-							promptBuff[len - 1] = 0;
+						int length = strlen(promptBuff);
+						if (promptBuff[length - 1] == '\n')
+							promptBuff[length - 1] = 0;
 						strtok(promptBuff, " ");
 						strcpy(prompt, promptBuff);
 					}
@@ -199,7 +199,13 @@ int sh( int argc, char **argv, char **envp )
 				printExec(command);
 				//When ran with no arguments, prints the whole environment.
 				if (args[1] == NULL)
-					printenv(enviro);
+				{
+					for (char **env = envp; *env != 0; env++)
+  					{
+    					char *currEnv = *env;
+    					printf("%s\n", currEnv);    
+  					}
+				}
 				//If one argument, call getenv(3) on it.
 				else if (args[2] == NULL)
 					printf("\n%s\n", getenv(args[1]));
@@ -215,7 +221,13 @@ int sh( int argc, char **argv, char **envp )
 				printExec(command);
 				//If no arguments, print the whole environment.
 				if (args[1] == NULL)
-					printenv(enviro);
+            	{
+					for (char **env = envp; *env != 0; env++)
+  					{
+    					char *currEnv = *env;
+    					printf("%s\n", currEnv);    
+  					}
+				}
 				//Must make sure a second argument is given for PATH or HOME.
 				else if(args[2] == NULL && (strcmp(args[1], "PATH") == 0 || strcmp(args[1], "HOME") == 0))
 					printf("\nDo not set PATH or HOME to empty\n");
@@ -341,14 +353,6 @@ void list ( char *dir )
 	}
 	closedir(userdir);
 } /* list() */
-
-void printenv(char ** envp) {
-	int i = 0;
-	while(envp[i]!=NULL){
-		printf("%s\n",envp[i]);
-		i++;
-	}
-}
 
 void printExec(char * command) {
 	printf("Executing %s\n", command);
