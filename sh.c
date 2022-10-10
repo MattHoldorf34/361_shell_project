@@ -16,9 +16,12 @@ CISC361-010 Project 2
 #include <glob.h>
 #include "sh.h"
 
+// This is the main shell function, loops until exited
+// Parameters: int- argc, char- **argv, char- **envp
+// Returns: 0 if successful
 int sh( int argc, char **argv, char **envp )
 {
-	int pid; //updated from initial file
+	int pid;
 	char *prompt = calloc(PROMPTMAX, sizeof(char));
 	char *commandline = calloc(MAX_CANON, sizeof(char));
 	char *command, *arg, *commandpath, *p, *pwd, *owd;
@@ -31,9 +34,8 @@ int sh( int argc, char **argv, char **envp )
 	char buff[MAXIMUM];
 	char promptBuff[PROMPTMAX];
 	uid = getuid();
-	password_entry = getpwuid(uid);               /* get passwd info */
-	homedir = password_entry->pw_dir;		/* Home directory to start
-											   out with*/
+	password_entry = getpwuid(uid);
+	homedir = password_entry->pw_dir;
 	if ( (pwd = getcwd(NULL, PATH_MAX+1)) == NULL )
 	{
 		perror("getcwd");
@@ -42,8 +44,8 @@ int sh( int argc, char **argv, char **envp )
 	owd = calloc(strlen(pwd) + 1, sizeof(char));
 	memcpy(owd, pwd, strlen(pwd));
 	prompt[0] = ' '; prompt[1] = '\0';
-	/* Put PATH into a linked list */
 	pathlist = get_path();
+	// Shell loop
 	while ( go )
 	{
 		/* print your prompt */
@@ -68,7 +70,8 @@ int sh( int argc, char **argv, char **envp )
 		}
 		if (command != NULL)
 		{
-			/* check for each built in command and implement */
+			// check for each built in command and implement
+			// Starting with the easy one: exit
 			if (strcmp(command, "exit") == 0) {
 				printExec(command);
 				break;
@@ -88,7 +91,7 @@ int sh( int argc, char **argv, char **envp )
 					free(commandpath);
 				}
 			}
-			//command is cd.
+			//cd
 			else if(strcmp(command, "cd" ) == 0)
 			{
 				//No arguments: returns to home directory.
@@ -155,6 +158,7 @@ int sh( int argc, char **argv, char **envp )
 				printExec(command);
 				printf("\nPID: %d\n", getpid());
 			}
+			//kill
 			else if (strcmp(command, "kill") == 0) {
 				if (args[1] == NULL)
 					printf("\nNo Argument Given for %s", command);
@@ -168,7 +172,7 @@ int sh( int argc, char **argv, char **envp )
 						printf("\nInvalid PID");
 				}
 			}
-			//Checks if it is prompt
+			//Checks if command is prompt
 			else if (strcmp(command, "prompt") == 0)
 			{
 				printExec(command);
@@ -273,12 +277,6 @@ int sh( int argc, char **argv, char **envp )
 				printf("%s: Command not found.\n", command);
 			}
 		}
-		/*  else  program to exec */
-		/* find it */
-		/* do fork(), execve() and waitpid() */
-
-		/* else */
-		/* fprintf(stderr, "%s: Command not found.\n", args[0]); */
 	}
 	deletepath(&pathlist);
 	free(args);
@@ -289,7 +287,7 @@ int sh( int argc, char **argv, char **envp )
 	pathlist = NULL;
 	exit(0);
 	return 0;
-} /* sh() */
+}
 
 // This function loops through pathlist until finding command and returns it.  Returns NULL when not found.
 // Parameters: char- *command, struct- pathelement *pathlist
@@ -311,14 +309,13 @@ char *which(char *command, struct pathelement *pathlist )
 		}
 	}
 	return NULL;
-} /* which() */
+}
 
 // This function loops through finding all locations of command.
 // Parameters: char- *command, struct- pathelement *pathlist
 // Returns: char
 char *where(char *command, struct pathelement *pathlist )
 {
-	/* similarly loop through finding all locations of command */
 	char buff[MAXIMUM];
 	char *ret;
 	int flag = 0;
@@ -339,15 +336,13 @@ char *where(char *command, struct pathelement *pathlist )
 		}
 	}
 	return ret;
-} /* where() */
+}
 
 // This function lists the files in the current working directory one per line
 // Parameters: char- *dir
 // Returns nothing
 void list ( char *dir )
 {
-	/* see man page for opendir() and readdir() and print out filenames for
-	   the directory passed */
 	DIR *userdir = opendir(dir);
 	struct dirent *file;
 	if (userdir) {
@@ -355,13 +350,12 @@ void list ( char *dir )
 			printf("%s\n", file->d_name);
 	}
 	closedir(userdir);
-} /* list() */
+}
 
-// Used when a command is being executed, shows user that what they entered is indeed executing
+// This function prints the command that is being executed
 // Parameters: char- *command
 // Returns nothing
 void printExec(char * command) {
-	/* Prints the command that is being executed. */
 	printf("Executing %s\n", command);
 }
 
