@@ -30,12 +30,10 @@ int sh( int argc, char **argv, char **envp )
 	struct pathelement *pathlist;
 	char buff[MAXIMUM];
 	char promptBuff[PROMPTMAX];
-
 	uid = getuid();
 	password_entry = getpwuid(uid);               /* get passwd info */
 	homedir = password_entry->pw_dir;		/* Home directory to start
 											   out with*/
-
 	if ( (pwd = getcwd(NULL, PATH_MAX+1)) == NULL )
 	{
 		perror("getcwd");
@@ -44,10 +42,8 @@ int sh( int argc, char **argv, char **envp )
 	owd = calloc(strlen(pwd) + 1, sizeof(char));
 	memcpy(owd, pwd, strlen(pwd));
 	prompt[0] = ' '; prompt[1] = '\0';
-
 	/* Put PATH into a linked list */
 	pathlist = get_path();
-
 	while ( go )
 	{
 		/* print your prompt */
@@ -60,7 +56,6 @@ int sh( int argc, char **argv, char **envp )
 				buff[len-1] = 0;
 			strcpy(commandline, buff);
 		}
-
 		int i = 0;
 		char *tok = strtok(commandline, " ");
 		command = tok;
@@ -71,7 +66,6 @@ int sh( int argc, char **argv, char **envp )
 			tok = strtok(NULL, " ");
 			i++;
 		}
-
 		if (command != NULL)
 		{
 			/* check for each built in command and implement */
@@ -94,7 +88,6 @@ int sh( int argc, char **argv, char **envp )
 					free(commandpath);
 				}
 			}
-
 			//command is cd.
 			else if(strcmp(command, "cd" ) == 0)
 			{
@@ -127,7 +120,6 @@ int sh( int argc, char **argv, char **envp )
 					}	    
 				}
 			}
-
 			//Checks for pwd command
 			else if (strcmp(command, "pwd") == 0) {
 				printExec(command);
@@ -217,8 +209,6 @@ int sh( int argc, char **argv, char **envp )
 				else
 					printf("\nprintenv: Too Many Arguments\n");
 			}
-
-
 			//Command is setenv
 			else if (strcmp(command, "setenv") == 0)
 			{
@@ -301,10 +291,11 @@ int sh( int argc, char **argv, char **envp )
 	return 0;
 } /* sh() */
 
+// This function loops through pathlist until finding command and returns it.  Returns NULL when not found.
+// Parameters: char- *command, struct- pathelement *pathlist
+// Returns: char 
 char *which(char *command, struct pathelement *pathlist )
 {
-	/* loop through pathlist until finding command and return it.  Return
-	   NULL when not found. */
 	char buff[MAXIMUM];
 	while (pathlist)
 	{
@@ -322,6 +313,9 @@ char *which(char *command, struct pathelement *pathlist )
 	return NULL;
 } /* which() */
 
+// This function loops through finding all locations of command.
+// Parameters: char- *command, struct- pathelement *pathlist
+// Returns: char
 char *where(char *command, struct pathelement *pathlist )
 {
 	/* similarly loop through finding all locations of command */
@@ -347,6 +341,9 @@ char *where(char *command, struct pathelement *pathlist )
 	return ret;
 } /* where() */
 
+// This function lists the files in the current working directory one per line
+// Parameters: char- *dir
+// Returns nothing
 void list ( char *dir )
 {
 	/* see man page for opendir() and readdir() and print out filenames for
@@ -360,11 +357,17 @@ void list ( char *dir )
 	closedir(userdir);
 } /* list() */
 
+// Used when a command is being executed, shows user that what they entered is indeed executing
+// Parameters: char- *command
+// Returns nothing
 void printExec(char * command) {
 	/* Prints the command that is being executed. */
 	printf("Executing %s\n", command);
 }
 
+// This function is used to find wildcards for commands
+// Parameters: wc- char, char- **args
+// Returns: int, -1 if no wildcards
 int findWildcard(char wc, char **args) {
 	int i = 0;
 	char *j;
