@@ -1,3 +1,7 @@
+// Matthew Holdorf & Thomas Oves
+// November 9, 2022
+// Project 4: A New Scheduler
+
 // Per-CPU state
 struct cpu {
   uchar apicid;                // Local APIC ID
@@ -48,7 +52,11 @@ struct proc {
   int killed;                  // If non-zero, have been killed
   struct file *ofile[NOFILE];  // Open files
   struct inode *cwd;           // Current directory
-  char name[16];               // Process name (debugging)
+  char name[16];			         // Process name (debugging)
+  // Added w/ Project 4
+  int queue;					         // Number in queue
+  int iter;					           // Process' iterations
+  int idle_it;        		     // Process' iterations while idle
 };
 
 // Process memory is laid out contiguously, low addresses first:
@@ -56,3 +64,4 @@ struct proc {
 //   original data and bss
 //   fixed-size stack
 //   expandable heap
+

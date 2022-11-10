@@ -1,3 +1,6 @@
+// Matthew Holdorf & Thomas Oves
+// November 9, 2022
+// Project 4: A New Scheduler
 #include "types.h"
 #include "defs.h"
 #include "param.h"
@@ -89,6 +92,9 @@ found:
   p->state = EMBRYO;
   p->pid = nextpid++;
 
+  p->queue = 3;
+  p->iter = 8;
+  p->idle_it = 0;
   release(&ptable.lock);
 
   // Allocate kernel stack.
@@ -322,39 +328,104 @@ wait(void)
 void
 scheduler(void)
 {
-  struct proc *p;
+  struct proc *p, *p1;
   struct cpu *c = mycpu();
   c->proc = 0;
   
-  for(;;){
+  for(;;)
+  {
     // Enable interrupts on this processor.
     sti();
-
+	  int high = 0;
     // Loop over process table looking for process to run.
     acquire(&ptable.lock);
-    for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+
+    for(p = ptable.proc; p < &ptable.proc[NPROC]; p++)
+    {
+      //Specific process
+      for(p1 = ptable.proc; p1 < &ptable.proc[NPROC]; p1++)
+      {
+        if(p1->state == RUNNABLE)
+        {
+          //Checks its priority
+          if(p1->queue > high)
+          {
+            high = p1->queue;
+            continue;
+          }
+          //Rechecks priority and iterations.
+          if((p1->queue >= high) && (p1->iter > 0))
+            continue;
+          if(p1->iter <= 0)
+          {
+            if(p1->queue > 0)
+            {
+                p1->queue = p1->queue - 1;
+                //Setting number of iterations for each # run.
+                if (p1->queue == 0)
+                    p1->iter = 500;
+                else if (p1->queue == 1)
+                    p1->iter = 24;
+                else if (p1->queue == 2)
+                    p1->iter = 16;
+                else
+                    p1->iter = 8;
+                    
+                continue;
+            }
+            p1->queue = 0; 
+            p1->iter = 500;
+
+            continue;
+          }
+          if (p1->idle_it > p1->iter)
+          {
+            if(p1->queue < 3)
+            {
+                //Setting number of iterations for each # run.
+                p1->queue = p1->queue + 1;
+                if (p1->queue == 0)
+                    p1->iter = 500;
+                else if (p1->queue == 1)
+                    p1->iter = 24;
+                else if (p1->queue == 2)
+                    p1->iter = 16;
+                else
+                    p1->iter = 8;
+
+                continue;
+            } 
+            p1->queue = 3;
+            p1->iter = 8;
+
+            continue;
+          }
+        }
+      }
       if(p->state != RUNNABLE)
         continue;
+      if((p->queue < high) || (p->iter <= 0))
+      {
+        p->idle_it++;
+        continue;
+      }
 
-      // Switch to chosen process.  It is the process's job
-      // to release ptable.lock and then reacquire it
-      // before jumping back to us.
+      p->idle_it = 0;
+      p->iter--;
       c->proc = p;
-      
-      cprintf("Process %s: %d is running \n", p->name, p->pid);
-
-	  switchuvm(p);
+      switchuvm(p);
       p->state = RUNNING;
 
+      //Prints all info about process.
+      cprintf("process [%s: %d] process queue:%d process iteration: %dms, idle iterations: %dms\n", p->name, p->pid, p->queue, p->iter*10, p->idle_it*10);
       swtch(&(c->scheduler), p->context);
       switchkvm();
-
+        
       // Process is done running for now.
       // It should have changed its p->state before coming back.
       c->proc = 0;
-    }
+	  }
     release(&ptable.lock);
-
   }
 }
 
@@ -535,3 +606,4 @@ procdump(void)
     cprintf("\n");
   }
 }
+
